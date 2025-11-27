@@ -1,0 +1,28 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.0.16 Chrome/132.0.6834.196 Electron/34.2.0 Safari/537.36" version="26.0.16">
+  <diagram name="Page-1" id="h-8iy4Gb8194nMBQRhdT">
+    <mxGraphModel dx="1290" dy="631" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="a8u8bIGOh94bszghnfyM-1" value="Uporabnik" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="35" y="262" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-2" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="168" y="8" width="482" height="735" as="geometry" />
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-3" value="" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="229" y="37" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-4" value="" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="229" y="169" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-5" value="" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="229" y="308" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-6" value="" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="229" y="449" width="120" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

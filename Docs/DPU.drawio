@@ -1,0 +1,87 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.0.16 Chrome/132.0.6834.196 Electron/34.2.0 Safari/537.36" version="26.0.16">
+  <diagram name="Page-1" id="h-8iy4Gb8194nMBQRhdT">
+    <mxGraphModel dx="1518" dy="742" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="a8u8bIGOh94bszghnfyM-2" value="" style="rounded=0;whiteSpace=wrap;html=1;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="168" y="8" width="482" height="474" as="geometry" />
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="a8u8bIGOh94bszghnfyM-1" target="a8u8bIGOh94bszghnfyM-3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="50" y="166" />
+              <mxPoint x="251" y="166" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="a8u8bIGOh94bszghnfyM-1" target="a8u8bIGOh94bszghnfyM-4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="50" y="181" />
+              <mxPoint x="389" y="181" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="a8u8bIGOh94bszghnfyM-1" target="a8u8bIGOh94bszghnfyM-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="50" y="195" />
+              <mxPoint x="532" y="195" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.3333333333333333;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="a8u8bIGOh94bszghnfyM-1" target="a8u8bIGOh94bszghnfyM-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.3333333333333333;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="a8u8bIGOh94bszghnfyM-1" target="a8u8bIGOh94bszghnfyM-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="65" y="303" />
+              <mxPoint x="389" y="303" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="a8u8bIGOh94bszghnfyM-1" target="a8u8bIGOh94bszghnfyM-13">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="50" y="386" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="a8u8bIGOh94bszghnfyM-1" target="a8u8bIGOh94bszghnfyM-14">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="50" y="442" />
+              <mxPoint x="395" y="442" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-1" value="Uporabnik" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="35" y="262" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-3" value="Pregled seznama rastlin" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="191" y="31" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-4" value="Iskanje rastlin" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="329" y="31" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-5" value="Ogled podrobnosti rastline" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="472" y="31" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-6" value="Dodajanje rastline v moj vrt" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="191" y="211" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-10" value="Dodajanje rastline na wishlist" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="329" y="208" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-13" value="Pregled koledarja" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="191" y="346" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="a8u8bIGOh94bszghnfyM-14" value="Ogled navodil oskrbe" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="335" y="346" width="120" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
