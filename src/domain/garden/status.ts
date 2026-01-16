@@ -12,20 +12,19 @@ const daysBetween = (from: string, to: number): number => {
 export const getGardenStatus = (
   entry: GardenEntry,
   now: number = Date.now(),
+  options: {
+    lastWateredAt?: string | null;
+    waterEveryDays?: number;
+  } = {},
 ): GardenStatus => {
-  const waterDays = entry.lastWateredAt
-    ? daysBetween(entry.lastWateredAt, now)
-    : Infinity;
-  const fertilizeDays = entry.lastFertilizedAt
-    ? daysBetween(entry.lastFertilizedAt, now)
+  const lastWateredAt = options.lastWateredAt ?? entry.lastWateredAt;
+  const waterEveryDays = options.waterEveryDays ?? GARDEN_DEFAULTS.waterEveryDays;
+  const waterDays = lastWateredAt
+    ? daysBetween(lastWateredAt, now)
     : Infinity;
 
-  if (waterDays >= GARDEN_DEFAULTS.waterEveryDays) {
+  if (waterDays >= waterEveryDays) {
     return 'needsWater';
-  }
-
-  if (fertilizeDays >= GARDEN_DEFAULTS.fertilizeEveryDays) {
-    return 'needsFertilizer';
   }
 
   return 'ok';

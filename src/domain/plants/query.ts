@@ -1,7 +1,5 @@
 import type { PlantListFilters } from './types';
 
-export type TrefleFilterQuery = Record<string, string | number | boolean>;
-
 export type PerenualQuery = {
   query?: string;
   edible?: boolean;
@@ -9,6 +7,7 @@ export type PerenualQuery = {
   cycle?: string;
   sunlight?: string;
   watering?: string;
+  indoor?: boolean;
   hardiness?: number;
 };
 
@@ -18,24 +17,6 @@ export const normalizeQuery = (value?: string): string | undefined => {
   }
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
-};
-
-export const buildTrefleFilters = (filters: PlantListFilters): TrefleFilterQuery => {
-  const result: TrefleFilterQuery = {};
-
-  if (filters.edible !== undefined) {
-    result['edible'] = filters.edible;
-  }
-
-  if (filters.poisonous !== undefined) {
-    result['poisonous'] = filters.poisonous;
-  }
-
-  if (filters.sunlight) {
-    result['sunlight'] = filters.sunlight;
-  }
-
-  return result;
 };
 
 export const buildPerenualQuery = (filters: PlantListFilters): PerenualQuery => {
@@ -64,6 +45,10 @@ export const buildPerenualQuery = (filters: PlantListFilters): PerenualQuery => 
 
   if (filters.watering !== undefined) {
     result.watering = filters.watering;
+  }
+
+  if (filters.indoor !== undefined) {
+    result.indoor = filters.indoor;
   }
 
   if (filters.hardiness !== undefined) {

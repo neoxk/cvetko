@@ -26,11 +26,11 @@ describe('GardenPlantFormScreen', () => {
       />,
     );
 
-    fireEvent.press(getByLabelText('Add plant'));
+    fireEvent.changeText(getByLabelText('Planting date'), '');
+    fireEvent.press(getByLabelText('Plant'));
 
     await waitFor(() => {
       expect(getByText('Plant name is required.')).toBeTruthy();
-      expect(getByText('Scientific name is required.')).toBeTruthy();
       expect(getByText('Planting date is required.')).toBeTruthy();
     });
   });

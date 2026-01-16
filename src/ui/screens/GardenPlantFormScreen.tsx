@@ -1,6 +1,7 @@
 import React from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Platform, ScrollView, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 import type { GardenEntry, GardenFormValues } from '@domain/garden/types';
 import { validateGardenForm } from '@domain/garden/validation';
@@ -10,19 +11,20 @@ import { Input } from '@ui/components/Input';
 import { ScreenLayout } from '@ui/components/ScreenLayout';
 import { useGarden } from '@ui/hooks/useGarden';
 import { useTheme } from '@ui/theme';
+import { formatDateOnly, getTodayUtc, parseDateOnly } from '@utils/dates';
 
 type GardenPlantFormScreenProps = NativeStackScreenProps<
   RootStackParamList,
   typeof Routes.GardenForm
 >;
 
-const emptyForm: GardenFormValues = {
+const createEmptyForm = (plantedAt: string): GardenFormValues => ({
   name: '',
   scientificName: '',
   location: '',
-  plantedAt: '',
+  plantedAt,
   notes: '',
-};
+});
 
 export const GardenPlantFormScreen = ({
   route,
@@ -31,9 +33,15 @@ export const GardenPlantFormScreen = ({
   const theme = useTheme();
   const garden = useGarden();
   const existing = route.params?.id ? garden.getById(route.params.id) : null;
+  const plantSeed = route.params?.plant;
+  const defaultPlantedAt = formatDateOnly(getTodayUtc());
   const [values, setValues] = React.useState<GardenFormValues>(() => {
     if (!existing) {
-      return emptyForm;
+      return {
+        ...createEmptyForm(defaultPlantedAt),
+        name: plantSeed?.name ?? '',
+        scientificName: plantSeed?.scientificName ?? '',
+      };
     }
     return {
       name: existing.name,
@@ -44,6 +52,7 @@ export const GardenPlantFormScreen = ({
     };
   });
   const [errors, setErrors] = React.useState<Partial<Record<keyof GardenFormValues, string>>>({});
+  const [showDatePicker, setShowDatePicker] = React.useState(false);
 
   const updateField = React.useCallback(
     (field: keyof GardenFormValues, value: string) => {
@@ -59,40 +68,47 @@ export const GardenPlantFormScreen = ({
       return;
     }
 
+    const resolvedScientificName =
+      values.scientificName.trim() || (existing?.scientificName ?? values.name.trim());
     const entry: GardenEntry = existing
       ? {
           ...existing,
           name: values.name.trim(),
-          scientificName: values.scientificName.trim(),
+          scientificName: resolvedScientificName,
           location: values.location.trim() ? values.location.trim() : null,
           plantedAt: values.plantedAt.trim(),
           notes: values.notes.trim() ? values.notes.trim() : null,
         }
       : {
           id: `garden-${Date.now()}`,
-          plantId: `custom-${Date.now()}`,
-          source: 'perenual',
+          plantId: plantSeed?.id ?? `custom-${Date.now()}`,
           name: values.name.trim(),
-          scientificName: values.scientificName.trim(),
-          imageUrl: null,
+          scientificName: resolvedScientificName,
+          imageUrl: plantSeed?.imageUrl ?? null,
           location: values.location.trim() ? values.location.trim() : null,
           plantedAt: values.plantedAt.trim(),
+          watering: plantSeed?.watering ?? null,
+          sunlight: plantSeed?.sunlight ?? null,
+          cycle: plantSeed?.cycle ?? null,
+          hardinessMin: plantSeed?.hardinessMin ?? null,
+          hardinessMax: plantSeed?.hardinessMax ?? null,
+          description: plantSeed?.description ?? null,
           lastWateredAt: null,
-          lastFertilizedAt: null,
           notes: values.notes.trim() ? values.notes.trim() : null,
         };
 
     if (existing) {
       garden.updateEntry(entry);
-    } else {
-      garden.addEntry(entry);
+      navigation.goBack();
+      return;
     }
 
-    navigation.goBack();
+    garden.addEntry(entry);
+    navigation.navigate(Routes.RootTabs, { screen: Routes.Garden });
   }, [existing, garden, navigation, values]);
 
   return (
-    <ScreenLayout title={existing ? 'Edit plant' : 'Add plant'} footerText="Cvetko">
+    <ScreenLayout title={existing ? 'Edit plant' : 'Add plant'}>
       <ScrollView contentContainerStyle={{ paddingBottom: theme.spacing.xl }}>
         <View style={{ marginBottom: theme.spacing.md }}>
           <Input
@@ -100,14 +116,6 @@ export const GardenPlantFormScreen = ({
             value={values.name}
             onChangeText={(value) => updateField('name', value)}
             {...(errors.name ? { errorText: errors.name } : {})}
-          />
-        </View>
-        <View style={{ marginBottom: theme.spacing.md }}>
-          <Input
-            label="Scientific name"
-            value={values.scientificName}
-            onChangeText={(value) => updateField('scientificName', value)}
-            {...(errors.scientificName ? { errorText: errors.scientificName } : {})}
           />
         </View>
         <View style={{ marginBottom: theme.spacing.md }}>
@@ -123,9 +131,33 @@ export const GardenPlantFormScreen = ({
             label="Planting date"
             value={values.plantedAt}
             onChangeText={(value) => updateField('plantedAt', value)}
-            helperText="YYYY-MM-DD"
+            helperText="Use YYYY-MM-DD or pick a date below."
             {...(errors.plantedAt ? { errorText: errors.plantedAt } : {})}
           />
+          <View style={{ marginTop: theme.spacing.sm, alignSelf: 'flex-start' }}>
+            <Button
+              label="Change date"
+              variant="secondary"
+              onPress={() => setShowDatePicker(true)}
+            />
+          </View>
+          {showDatePicker ? (
+            <View style={{ marginTop: theme.spacing.sm }}>
+              <DateTimePicker
+                mode="date"
+                display={Platform.OS === 'ios' ? 'inline' : 'calendar'}
+                value={parseDateOnly(values.plantedAt) ?? getTodayUtc()}
+                onChange={(event, selectedDate) => {
+                  if (Platform.OS !== 'ios') {
+                    setShowDatePicker(false);
+                  }
+                  if (event.type === 'set' && selectedDate) {
+                    updateField('plantedAt', formatDateOnly(selectedDate));
+                  }
+                }}
+              />
+            </View>
+          ) : null}
         </View>
         <View style={{ marginBottom: theme.spacing.lg }}>
           <Input
@@ -135,7 +167,7 @@ export const GardenPlantFormScreen = ({
             helperText="Optional care notes"
           />
         </View>
-        <Button label={existing ? 'Save changes' : 'Add plant'} onPress={handleSubmit} />
+        <Button label={existing ? 'Save changes' : 'Plant'} onPress={handleSubmit} />
         {garden.error ? (
           <Text
             style={{

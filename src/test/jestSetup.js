@@ -14,3 +14,19 @@ jest.mock('expo-notifications', () => ({
   AndroidImportance: { DEFAULT: 3 },
   SchedulableTriggerInputTypes: { DATE: 'date' },
 }));
+
+jest.mock('@expo/vector-icons/Ionicons', () => {
+  const React = require('react');
+  return function IoniconsMock(props) {
+    return React.createElement('Icon', props);
+  };
+});
+
+jest.mock('expo-sqlite', () => ({
+  openDatabaseAsync: jest.fn().mockResolvedValue({
+    execAsync: jest.fn().mockResolvedValue(undefined),
+    runAsync: jest.fn().mockResolvedValue({}),
+    getAllAsync: jest.fn().mockResolvedValue([]),
+    getFirstAsync: jest.fn().mockResolvedValue(null),
+  }),
+}));

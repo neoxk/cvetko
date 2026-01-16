@@ -1,13 +1,12 @@
 import React from 'react';
 
 import type { PlantDetailRepository } from '@data/plants/detailRepository';
-import type { PlantDetail, PlantDetailSource } from '@domain/plants/detailTypes';
+import type { PlantDetail } from '@domain/plants/detailTypes';
 import { createAppError } from '@utils/errors';
 
 export type UsePlantDetailParams = {
   repository: PlantDetailRepository | null;
   id: string;
-  source: PlantDetailSource;
 };
 
 export type PlantDetailState = {
@@ -20,7 +19,6 @@ export type PlantDetailState = {
 export const usePlantDetail = ({
   repository,
   id,
-  source,
 }: UsePlantDetailParams): PlantDetailState => {
   const [detail, setDetail] = React.useState<PlantDetail | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -30,7 +28,7 @@ export const usePlantDetail = ({
     if (!repository) {
       setError(
         createAppError('ConfigError', 'Missing API keys. Set env keys to fetch plants.', {
-          details: { source },
+          details: { api: 'perenual' },
         }),
       );
       setIsLoading(false);
@@ -42,14 +40,14 @@ export const usePlantDetail = ({
     setDetail(null);
 
     try {
-      const response = await repository.getPlantDetail({ id, source });
+      const response = await repository.getPlantDetail({ id });
       setDetail(response);
     } catch (err) {
       setError(err as Error);
     } finally {
       setIsLoading(false);
     }
-  }, [id, repository, source]);
+  }, [id, repository]);
 
   React.useEffect(() => {
     void loadDetail();

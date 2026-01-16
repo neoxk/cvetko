@@ -4,27 +4,15 @@ import { fireEvent } from '@testing-library/react-native';
 import { renderWithTheme } from '../../test/renderWithTheme';
 import { CareCalendarScreen } from './CareCalendarScreen';
 
-const mockUseCalendar = jest.fn();
+const mockUseGarden = jest.fn();
+const mockUseCareEvents = jest.fn();
 
-jest.mock('@ui/hooks/useCalendar', () => ({
-  useCalendar: () => mockUseCalendar(),
+jest.mock('@ui/hooks/useGarden', () => ({
+  useGarden: () => mockUseGarden(),
 }));
 
-jest.mock('@ui/hooks/useSettings', () => ({
-  useSettings: () => ({
-    settings: {
-      unitSystem: 'metric',
-      locationLabel: null,
-      notificationsEnabled: true,
-      weatherAlertsEnabled: false,
-      reminderHour: 8,
-    },
-    isLoading: false,
-    error: null,
-    refresh: jest.fn(),
-    updateSettings: jest.fn(),
-    resetSettings: jest.fn(),
-  }),
+jest.mock('@ui/hooks/useCareEvents', () => ({
+  useCareEvents: () => mockUseCareEvents(),
 }));
 
 describe('CareCalendarScreen', () => {
@@ -37,15 +25,24 @@ describe('CareCalendarScreen', () => {
   });
 
   it('renders empty state for week view', () => {
-    mockUseCalendar.mockReturnValue({
-      tasks: [],
+    mockUseGarden.mockReturnValue({
+      entries: [],
       isLoading: false,
       error: null,
       refresh: jest.fn(),
-      addTask: jest.fn(),
-      updateTask: jest.fn(),
-      removeTask: jest.fn(),
+      addEntry: jest.fn(),
+      updateEntry: jest.fn(),
+      removeEntry: jest.fn(),
       getById: jest.fn(),
+      hasPlant: jest.fn(),
+    });
+    mockUseCareEvents.mockReturnValue({
+      events: [],
+      isLoading: false,
+      error: null,
+      refresh: jest.fn(),
+      addWaterEvent: jest.fn(),
+      getLatestWaterEvent: jest.fn(),
     });
 
     const { getByText } = renderWithTheme(<CareCalendarScreen />);
@@ -54,51 +51,53 @@ describe('CareCalendarScreen', () => {
   });
 
   it('switches views and renders tasks in range', () => {
-    mockUseCalendar.mockReturnValue({
-      tasks: [
+    mockUseGarden.mockReturnValue({
+      entries: [
         {
-          id: 'task-1',
+          id: 'g1',
           plantId: 'p1',
-          plantName: 'Aloe',
-          type: 'water',
-          title: 'Water Aloe',
-          dueDate: '2024-01-01',
-          status: 'pending',
-          recurrence: null,
-          completedAt: null,
-          notes: null,
-        },
-        {
-          id: 'task-2',
-          plantId: 'p2',
-          plantName: 'Fern',
-          type: 'mist',
-          title: 'Mist Fern',
-          dueDate: '2024-01-25',
-          status: 'pending',
-          recurrence: null,
-          completedAt: null,
+          name: 'Aloe',
+          scientificName: 'Aloe vera',
+          imageUrl: null,
+          location: null,
+          plantedAt: '2023-12-01',
+          watering: 'frequent',
+          sunlight: null,
+          cycle: null,
+          hardinessMin: null,
+          hardinessMax: null,
+          description: null,
+          lastWateredAt: '2023-12-29T00:00:00.000Z',
           notes: null,
         },
       ],
       isLoading: false,
       error: null,
       refresh: jest.fn(),
-      addTask: jest.fn(),
-      updateTask: jest.fn(),
-      removeTask: jest.fn(),
+      addEntry: jest.fn(),
+      updateEntry: jest.fn(),
+      removeEntry: jest.fn(),
       getById: jest.fn(),
+      hasPlant: jest.fn(),
+    });
+    mockUseCareEvents.mockReturnValue({
+      events: [],
+      isLoading: false,
+      error: null,
+      refresh: jest.fn(),
+      addWaterEvent: jest.fn(),
+      getLatestWaterEvent: jest.fn(() => null),
     });
 
-    const { getByText, queryByText } = renderWithTheme(<CareCalendarScreen />);
+    const { getAllByText, getByText, queryByText } = renderWithTheme(<CareCalendarScreen />);
 
-    expect(getByText('Water Aloe')).toBeTruthy();
-    expect(queryByText('Mist Fern')).toBeNull();
+    expect(getAllByText('Aloe').length).toBeGreaterThan(0);
+    expect(queryByText('Fern')).toBeNull();
 
     fireEvent.press(getByText('Month'));
-    expect(getByText('Mist Fern')).toBeTruthy();
+    expect(getAllByText('1 water').length).toBeGreaterThan(0);
 
     fireEvent.press(getByText('Day'));
-    expect(queryByText('Mist Fern')).toBeNull();
+    expect(queryByText('Fern')).toBeNull();
   });
 });

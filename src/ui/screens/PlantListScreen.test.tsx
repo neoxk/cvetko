@@ -18,7 +18,6 @@ describe('PlantListScreen', () => {
         data: [
           {
             id: '1',
-            source: 'perenual',
             commonName: 'Rose',
             scientificName: 'Rosa',
             imageUrl: null,

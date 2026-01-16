@@ -7,13 +7,10 @@ export const cacheTtlMs = {
 };
 
 export const cacheKeys = {
-  treflePlantList: (page: number) => `trefle:plants:list:${page}`,
-  trefleSearch: (query: string, page: number) => `trefle:plants:search:${query}:${page}`,
-  trefleDetails: (id: string) => `trefle:plants:detail:${id}`,
   perenualPlantList: (page: number) => `perenual:plants:list:${page}`,
   perenualSearch: (query: string, page: number) => `perenual:plants:search:${query}:${page}`,
   perenualDetails: (id: string) => `perenual:plants:detail:${id}`,
-  plantDetail: (source: string, id: string) => `plants:detail:${source}:${id}`,
+  plantDetail: (id: string) => `plants:detail:${id}`,
   perenualCareGuides: (page: number) => `perenual:care-guides:${page}`,
   perenualPests: (page: number) => `perenual:pests:${page}`,
 };

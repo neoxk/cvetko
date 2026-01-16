@@ -1,8 +1,5 @@
-export type PlantSource = 'trefle' | 'perenual';
-
 export type PlantListItem = {
   id: string;
-  source: PlantSource;
   commonName: string | null;
   scientificName: string;
   imageUrl: string | null;
@@ -15,5 +12,6 @@ export type PlantListFilters = {
   cycle?: string;
   sunlight?: string;
   watering?: string;
+  indoor?: boolean;
   hardiness?: number;
 };

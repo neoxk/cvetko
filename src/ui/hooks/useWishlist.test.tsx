@@ -2,13 +2,12 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react-native';
 
 import { createWishlistRepository } from '@data/wishlist/repository';
-import { MemoryStorage } from '@data/wishlist/storage';
+import { MemoryWishlistStore } from '@data/wishlist/storage';
 import type { WishlistItem } from '@domain/wishlist/types';
 import { useWishlist } from './useWishlist';
 
 const item: WishlistItem = {
   id: '1',
-  source: 'perenual',
   name: 'Rose',
   scientificName: 'Rosa',
   imageUrl: null,
@@ -17,7 +16,7 @@ const item: WishlistItem = {
 
 describe('useWishlist', () => {
   it('toggles items', async () => {
-    const repository = createWishlistRepository(new MemoryStorage());
+    const repository = createWishlistRepository(new MemoryWishlistStore());
     const { result } = renderHook(() => useWishlist({ repository }));
 
     await act(async () => {
@@ -28,6 +27,6 @@ describe('useWishlist', () => {
       result.current.toggle(item);
     });
 
-    expect(result.current.isInWishlist(item.id, item.source)).toBe(true);
+    expect(result.current.isInWishlist(item.id)).toBe(true);
   });
 });

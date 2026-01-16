@@ -10,10 +10,12 @@ describe('usePlantFilters', () => {
     act(() => {
       result.current.setQuery('fern');
       result.current.setEdible(true);
+      result.current.setWatering('average');
     });
 
     expect(result.current.filters.query).toBe('fern');
     expect(result.current.filters.edible).toBe(true);
+    expect(result.current.filters.watering).toBe('average');
 
     act(() => {
       result.current.clearFilters();
@@ -21,5 +23,6 @@ describe('usePlantFilters', () => {
 
     expect(result.current.filters.query).toBe('');
     expect(result.current.filters.edible).toBeUndefined();
+    expect(result.current.filters.watering).toBeUndefined();
   });
 });

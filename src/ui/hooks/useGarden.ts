@@ -14,7 +14,7 @@ export type UseGardenState = {
   updateEntry: (entry: GardenEntry) => void;
   removeEntry: (id: string) => void;
   getById: (id: string) => GardenEntry | null;
-  hasPlant: (plantId: string, source: GardenEntry['source']) => boolean;
+  hasPlant: (plantId: string) => boolean;
 };
 
 export type UseGardenParams = {
@@ -106,8 +106,7 @@ export const useGarden = ({ repository }: UseGardenParams = {}): UseGardenState 
   );
 
   const hasPlant = React.useCallback(
-    (plantId: string, source: GardenEntry['source']) =>
-      entries.some((entry) => entry.plantId === plantId && entry.source === source),
+    (plantId: string) => entries.some((entry) => entry.plantId === plantId),
     [entries],
   );
 

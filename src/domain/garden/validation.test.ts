@@ -11,7 +11,6 @@ describe('validateGardenForm', () => {
     });
 
     expect(errors.name).toBe('Plant name is required.');
-    expect(errors.scientificName).toBe('Scientific name is required.');
     expect(errors.plantedAt).toBe('Planting date is required.');
   });
 

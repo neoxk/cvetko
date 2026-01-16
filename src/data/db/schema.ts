@@ -4,7 +4,7 @@ export type DbSchema = {
 };
 
 export const dbSchema: DbSchema = {
-  version: 1,
+  version: 5,
   statements: [
     `CREATE TABLE IF NOT EXISTS settings (
       id INTEGER PRIMARY KEY NOT NULL,
@@ -13,7 +13,6 @@ export const dbSchema: DbSchema = {
     );`,
     `CREATE TABLE IF NOT EXISTS wishlist_items (
       id TEXT PRIMARY KEY NOT NULL,
-      source TEXT NOT NULL,
       name TEXT NOT NULL,
       scientific_name TEXT NOT NULL,
       image_url TEXT,
@@ -22,14 +21,27 @@ export const dbSchema: DbSchema = {
     `CREATE TABLE IF NOT EXISTS garden_entries (
       id TEXT PRIMARY KEY NOT NULL,
       plant_id TEXT NOT NULL,
-      source TEXT NOT NULL,
       name TEXT NOT NULL,
       scientific_name TEXT NOT NULL,
       image_url TEXT,
+      source TEXT NOT NULL DEFAULT 'app',
       location TEXT,
       planted_at TEXT NOT NULL,
+      watering TEXT,
+      sunlight TEXT,
+      cycle TEXT,
+      hardiness_min INTEGER,
+      hardiness_max INTEGER,
+      description TEXT,
       last_watered_at TEXT,
-      last_fertilized_at TEXT,
+      notes TEXT
+    );`,
+    `CREATE TABLE IF NOT EXISTS care_events (
+      id TEXT PRIMARY KEY NOT NULL,
+      garden_entry_id TEXT NOT NULL,
+      plant_id TEXT NOT NULL,
+      type TEXT NOT NULL,
+      occurred_at TEXT NOT NULL,
       notes TEXT
     );`,
     `CREATE TABLE IF NOT EXISTS calendar_tasks (

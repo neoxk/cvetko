@@ -1,10 +1,12 @@
 import { createHttpClient } from '@data/http/client';
 import { withRetry } from '@data/http/retry';
+import { createAppError } from '@utils/errors';
 import type { PaginatedResponse, PlantDetails, PlantSummary } from '@data/types';
 import {
   mapPerenualDetails,
   mapPerenualListResponse,
   type PerenualDetailResponse,
+  type PerenualDetail,
   type PerenualListResponse,
 } from './mappers';
 
@@ -24,6 +26,7 @@ export type PerenualListParams = {
   cycle?: string;
   sunlight?: string;
   watering?: string;
+  indoor?: boolean;
   hardiness?: number;
 };
 
@@ -49,22 +52,30 @@ export const createPerenualClient = (options: PerenualClientOptions) => {
             page,
             q: params.query,
             order: params.order,
-            edible: params.edible,
-            poisonous: params.poisonous,
-            cycle: params.cycle,
-            sunlight: params.sunlight,
-            watering: params.watering,
-            hardiness: params.hardiness,
-          },
-        }),
-      );
+          edible: params.edible,
+          poisonous: params.poisonous,
+          cycle: params.cycle,
+          sunlight: params.sunlight,
+          watering: params.watering,
+          indoor: params.indoor,
+          hardiness: params.hardiness,
+        },
+      }),
+    );
       return mapPerenualListResponse(response.data, page);
     },
     getPlantDetails: async (id: string | number): Promise<PlantDetails> => {
       const response = await withRetry(() =>
-        client.get<PerenualDetailResponse>(`/species/details/${id}`),
+        client.get<PerenualDetailResponse | PerenualDetail>(`/species/details/${id}`),
       );
-      return mapPerenualDetails(response.data.data);
+      const payload =
+        (response.data as PerenualDetailResponse).data ?? (response.data as PerenualDetail);
+      if (!payload) {
+        throw createAppError('ApiError', 'Perenual returned empty detail payload', {
+          details: { id },
+        });
+      }
+      return mapPerenualDetails(payload);
     },
   };
 };

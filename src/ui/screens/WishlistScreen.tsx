@@ -25,7 +25,6 @@ export const WishlistScreen = (): React.ReactElement => {
         onPress={() =>
           navigation.navigate('PlantDetail', {
             id: item.id,
-            source: item.source,
           })
         }
         actionLabel="Remove"
@@ -59,12 +58,12 @@ export const WishlistScreen = (): React.ReactElement => {
       <FlatList
         data={wishlist.items}
         renderItem={renderItem}
-        keyExtractor={(item) => `${item.source}:${item.id}`}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: theme.spacing.xl }}
         ItemSeparatorComponent={() => <View style={{ height: theme.spacing.lg }} />}
       />
     );
   }
 
-  return <ScreenLayout title="Wishlist" footerText="Cvetko">{content}</ScreenLayout>;
+  return <ScreenLayout title="Wishlist">{content}</ScreenLayout>;
 };

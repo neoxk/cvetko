@@ -14,7 +14,6 @@ describe('perenual mappers', () => {
 
     expect(summary).toEqual({
       id: '44',
-      source: 'perenual',
       commonName: 'Snake plant',
       scientificName: 'Dracaena trifasciata',
       imageUrl: 'medium',

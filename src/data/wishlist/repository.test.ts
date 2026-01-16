@@ -1,9 +1,8 @@
 import { createWishlistRepository } from './repository';
-import { MemoryStorage, type StorageAdapter } from './storage';
+import { MemoryWishlistStore, type WishlistStore } from './storage';
 
 const item = {
   id: '1',
-  source: 'perenual' as const,
   name: 'Rose',
   scientificName: 'Rosa',
   imageUrl: null,
@@ -12,31 +11,34 @@ const item = {
 
 describe('wishlist repository', () => {
   it('adds and removes items', async () => {
-    const repo = createWishlistRepository(new MemoryStorage());
+    const repo = createWishlistRepository(new MemoryWishlistStore());
 
     await repo.add(item);
-    expect(await repo.isInWishlist(item.id, item.source)).toBe(true);
+    expect(await repo.isInWishlist(item.id)).toBe(true);
 
-    await repo.remove(item.id, item.source);
-    expect(await repo.isInWishlist(item.id, item.source)).toBe(false);
+    await repo.remove(item.id);
+    expect(await repo.isInWishlist(item.id)).toBe(false);
   });
 
   it('toggles items', async () => {
-    const repo = createWishlistRepository(new MemoryStorage());
+    const repo = createWishlistRepository(new MemoryWishlistStore());
 
     expect(await repo.toggle(item)).toBe(true);
     expect(await repo.toggle(item)).toBe(false);
   });
 
   it('handles storage errors', async () => {
-    const failingStorage: StorageAdapter = {
-      getItem: async () => {
+    const failingStorage: WishlistStore = {
+      getAll: async () => {
         throw new Error('fail');
       },
-      setItem: async () => {
+      add: async () => {
         throw new Error('fail');
       },
-      removeItem: async () => {
+      remove: async () => {
+        throw new Error('fail');
+      },
+      isInWishlist: async () => {
         throw new Error('fail');
       },
     };

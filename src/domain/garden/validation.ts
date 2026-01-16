@@ -11,10 +11,6 @@ export const validateGardenForm = (values: GardenFormValues): GardenFormErrors =
     errors.name = 'Plant name is required.';
   }
 
-  if (!values.scientificName.trim()) {
-    errors.scientificName = 'Scientific name is required.';
-  }
-
   if (!values.plantedAt.trim()) {
     errors.plantedAt = 'Planting date is required.';
   } else if (!isValidDate(values.plantedAt)) {

@@ -15,6 +15,9 @@ type PlantListItemCardProps = {
   actionLabel?: string;
   onAction?: () => void;
   actionDisabled?: boolean;
+  secondaryActionLabel?: string;
+  onSecondaryAction?: () => void;
+  secondaryActionDisabled?: boolean;
 };
 
 export const PlantListItemCard = ({
@@ -27,6 +30,9 @@ export const PlantListItemCard = ({
   actionLabel,
   onAction,
   actionDisabled = false,
+  secondaryActionLabel,
+  onSecondaryAction,
+  secondaryActionDisabled = false,
 }: PlantListItemCardProps): React.ReactElement => {
   const theme = useTheme();
   const statusStyles = {
@@ -127,13 +133,21 @@ export const PlantListItemCard = ({
           </View>
         </Pressable>
         {actionLabel && onAction ? (
-          <View style={{ marginLeft: theme.spacing.sm }}>
+          <View style={{ marginLeft: theme.spacing.sm, gap: theme.spacing.xs }}>
             <Button
               label={actionLabel}
               variant="tertiary"
               onPress={onAction}
               disabled={actionDisabled}
             />
+            {secondaryActionLabel && onSecondaryAction ? (
+              <Button
+                label={secondaryActionLabel}
+                variant="tertiary"
+                onPress={onSecondaryAction}
+                disabled={secondaryActionDisabled}
+              />
+            ) : null}
           </View>
         ) : null}
       </View>

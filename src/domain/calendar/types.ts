@@ -1,4 +1,4 @@
-export type CalendarTaskType = 'water' | 'fertilize' | 'prune' | 'repot' | 'mist' | 'custom';
+export type CalendarTaskType = 'water' | 'prune' | 'repot' | 'mist' | 'custom';
 
 export type CalendarTaskStatus = 'pending' | 'done' | 'skipped';
 

@@ -22,6 +22,17 @@ jest.mock('@ui/hooks/useGarden', () => ({
   }),
 }));
 
+jest.mock('@ui/hooks/useCareEvents', () => ({
+  useCareEvents: () => ({
+    events: [],
+    isLoading: false,
+    error: null,
+    refresh: jest.fn(),
+    addWaterEvent: jest.fn(),
+    getLatestWaterEvent: jest.fn(),
+  }),
+}));
+
 describe('MyGardenScreen', () => {
   it('renders empty state', () => {
     const { getByText } = renderWithTheme(<MyGardenScreen />);

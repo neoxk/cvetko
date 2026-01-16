@@ -1,23 +1,27 @@
 import { createGardenRepository } from './repository';
-import { MemoryStorage, type StorageAdapter } from './storage';
+import { MemoryGardenStore, type GardenStore } from './storage';
 
 const entry = {
   id: '1',
   plantId: 'p1',
-  source: 'perenual' as const,
   name: 'Rose',
   scientificName: 'Rosa',
   imageUrl: null,
   location: null,
   plantedAt: '2024-01-01T00:00:00.000Z',
+  watering: null,
+  sunlight: null,
+  cycle: null,
+  hardinessMin: null,
+  hardinessMax: null,
+  description: null,
   lastWateredAt: null,
-  lastFertilizedAt: null,
   notes: null,
 };
 
 describe('garden repository', () => {
   it('adds, updates, and removes entries', async () => {
-    const repo = createGardenRepository(new MemoryStorage());
+    const repo = createGardenRepository(new MemoryGardenStore());
 
     await repo.add(entry);
     const stored = await repo.getAll();
@@ -33,14 +37,20 @@ describe('garden repository', () => {
   });
 
   it('handles storage errors', async () => {
-    const failingStorage: StorageAdapter = {
-      getItem: async () => {
+    const failingStorage: GardenStore = {
+      getAll: async () => {
         throw new Error('fail');
       },
-      setItem: async () => {
+      add: async () => {
         throw new Error('fail');
       },
-      removeItem: async () => {
+      update: async () => {
+        throw new Error('fail');
+      },
+      remove: async () => {
+        throw new Error('fail');
+      },
+      getById: async () => {
         throw new Error('fail');
       },
     };

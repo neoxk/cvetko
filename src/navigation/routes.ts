@@ -1,9 +1,9 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
-import type { PlantSource } from '@domain/plants/types';
 
 export const Routes = {
   RootTabs: 'RootTabs',
   PlantDetail: 'PlantDetail',
+  GardenDetail: 'GardenDetail',
   GardenForm: 'GardenForm',
   Browse: 'Browse',
   Calendar: 'Calendar',
@@ -22,6 +22,21 @@ export type RootTabParamList = {
 
 export type RootStackParamList = {
   RootTabs: NavigatorScreenParams<RootTabParamList>;
-  PlantDetail: { id: string; source: PlantSource };
-  GardenForm: { id?: string };
+  PlantDetail: { id: string };
+  GardenDetail: { id: string };
+  GardenForm: {
+    id?: string;
+    plant?: {
+      id: string;
+      name: string;
+      scientificName: string;
+      imageUrl: string | null;
+      watering: string | null;
+      sunlight: string | null;
+      cycle: string | null;
+      hardinessMin: number | null;
+      hardinessMax: number | null;
+      description: string | null;
+    };
+  };
 };

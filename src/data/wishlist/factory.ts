@@ -1,5 +1,5 @@
-import { createAsyncStorageAdapter } from '@data/storage/asyncStorage';
 import { createWishlistRepository, type WishlistRepository } from './repository';
+import { createDbWishlistStore } from './storage';
 
 export const createDefaultWishlistRepository = (): WishlistRepository =>
-  createWishlistRepository(createAsyncStorageAdapter());
+  createWishlistRepository(createDbWishlistStore());

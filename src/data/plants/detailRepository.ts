@@ -3,17 +3,14 @@ import type { Cache } from '@data/cache';
 import { cacheKeys, cacheTtlMs } from '@data/cache/keys';
 import { invalidateAllPlantDetails, invalidatePlantDetail } from '@data/cache/invalidation';
 import type { PlantDetails } from '@data/types';
-import type { PlantDetail, PlantDetailSource } from '@domain/plants/detailTypes';
+import type { PlantDetail } from '@domain/plants/detailTypes';
 import { mapPlantDetailsToDetail } from '@domain/plants/detailMappers';
 import type { createPerenualClient } from '@data/perenual/client';
-import type { createTrefleClient } from '@data/trefle/client';
 
-type TrefleClient = ReturnType<typeof createTrefleClient>;
 type PerenualClient = ReturnType<typeof createPerenualClient>;
 
 export type PlantDetailRepositoryParams = {
   id: string;
-  source: PlantDetailSource;
 };
 
 export type PlantDetailRepository = {
@@ -23,54 +20,40 @@ export type PlantDetailRepository = {
 };
 
 export type PlantDetailRepositoryOptions = {
-  trefleClient: TrefleClient;
   perenualClient: PerenualClient;
   cache: Cache;
 };
 
 const fetchDetails = async (
-  source: PlantDetailSource,
   id: string,
-  trefleClient: TrefleClient,
   perenualClient: PerenualClient,
-): Promise<PlantDetails> => {
-  if (source === 'trefle') {
-    return trefleClient.getPlantDetails(id);
-  }
-
-  return perenualClient.getPlantDetails(id);
-};
+): Promise<PlantDetails> => perenualClient.getPlantDetails(id);
 
 export const createPlantDetailRepository = (
   options: PlantDetailRepositoryOptions,
 ): PlantDetailRepository => ({
-  getPlantDetail: async ({ id, source }) => {
-    const cacheKey = cacheKeys.plantDetail(source, id);
+  getPlantDetail: async ({ id }) => {
+    const cacheKey = cacheKeys.plantDetail(id);
     const cached = options.cache.get<PlantDetail>(cacheKey);
     if (cached) {
       return cached;
     }
 
     try {
-      const details = await fetchDetails(
-        source,
-        id,
-        options.trefleClient,
-        options.perenualClient,
-      );
-      const detail = mapPlantDetailsToDetail(details, source);
+      const details = await fetchDetails(id, options.perenualClient);
+      const detail = mapPlantDetailsToDetail(details);
       options.cache.set(cacheKey, detail, cacheTtlMs.plantDetails);
       return detail;
     } catch (error) {
       throw normalizeApiError(error, {
-        service: source,
+        service: 'perenual',
         message: 'Failed to load plant details',
         kind: 'unknown',
         retryable: false,
-        context: { id, source },
+        context: { id },
       });
     }
   },
-  invalidate: ({ id, source }) => invalidatePlantDetail(options.cache, source, id),
+  invalidate: ({ id }) => invalidatePlantDetail(options.cache, id),
   invalidateAll: () => invalidateAllPlantDetails(options.cache),
 });

@@ -8,7 +8,7 @@ export const GardenScreen = (): React.ReactElement => {
   const theme = useTheme();
 
   return (
-    <ScreenLayout title="My garden" footerText="Cvetko">
+    <ScreenLayout title="My garden">
       <Text
         style={{
           color: theme.colors.textSecondary,

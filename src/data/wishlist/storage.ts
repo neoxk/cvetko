@@ -1,63 +1,90 @@
-import { createAppError } from '@utils/errors';
-import { WISHLIST_STORAGE_KEY } from '@domain/wishlist/constants';
 import type { WishlistItem } from '@domain/wishlist/types';
+import type { DatabaseClient } from '@data/db/client';
+import { getDatabase } from '@data/db/connection';
+import { logger } from '@utils/logger';
 
-export type StorageAdapter = {
-  getItem: (key: string) => Promise<string | null>;
-  setItem: (key: string, value: string) => Promise<void>;
-  removeItem: (key: string) => Promise<void>;
+export type WishlistStore = {
+  getAll: () => Promise<WishlistItem[]>;
+  add: (item: WishlistItem) => Promise<void>;
+  remove: (id: string) => Promise<void>;
+  isInWishlist: (id: string) => Promise<boolean>;
 };
 
-export class MemoryStorage implements StorageAdapter {
-  private store = new Map<string, string>();
+export class MemoryWishlistStore implements WishlistStore {
+  private items = new Map<string, WishlistItem>();
 
-  async getItem(key: string): Promise<string | null> {
-    return this.store.get(key) ?? null;
+  async getAll(): Promise<WishlistItem[]> {
+    return Array.from(this.items.values());
   }
 
-  async setItem(key: string, value: string): Promise<void> {
-    this.store.set(key, value);
+  async add(item: WishlistItem): Promise<void> {
+    this.items.set(item.id, item);
   }
 
-  async removeItem(key: string): Promise<void> {
-    this.store.delete(key);
+  async remove(id: string): Promise<void> {
+    this.items.delete(id);
+  }
+
+  async isInWishlist(id: string): Promise<boolean> {
+    return this.items.has(id);
   }
 }
 
-const parseItems = (raw: string): WishlistItem[] => {
-  try {
-    const parsed = JSON.parse(raw) as WishlistItem[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    throw createAppError('StorageError', 'Failed to parse wishlist data', { cause: error });
-  }
-};
+const mapRowToWishlistItem = (row: {
+  id: string;
+  name: string;
+  scientific_name: string;
+  image_url: string | null;
+  added_at: string;
+}): WishlistItem => ({
+  id: row.id,
+  name: row.name,
+  scientificName: row.scientific_name,
+  imageUrl: row.image_url ?? null,
+  addedAt: row.added_at,
+});
 
-const serializeItems = (items: WishlistItem[]): string => JSON.stringify(items);
-
-export const loadWishlistItems = async (storage: StorageAdapter): Promise<WishlistItem[]> => {
-  try {
-    const raw = await storage.getItem(WISHLIST_STORAGE_KEY);
-    if (!raw) {
-      return [];
-    }
-    return parseItems(raw);
-  } catch (error) {
-    throw createAppError('StorageError', 'Failed to load wishlist', { cause: error });
-  }
-};
-
-export const saveWishlistItems = async (
-  storage: StorageAdapter,
-  items: WishlistItem[],
-): Promise<void> => {
-  try {
-    if (items.length === 0) {
-      await storage.removeItem(WISHLIST_STORAGE_KEY);
-      return;
-    }
-    await storage.setItem(WISHLIST_STORAGE_KEY, serializeItems(items));
-  } catch (error) {
-    throw createAppError('StorageError', 'Failed to save wishlist', { cause: error });
-  }
-};
+export const createDbWishlistStore = (
+  dbPromise: Promise<DatabaseClient> = getDatabase(),
+): WishlistStore => ({
+  getAll: async () => {
+    const db = await dbPromise;
+    logger.debug('DB wishlist getAll');
+    const rows = await db.getAllAsync<{
+      id: string;
+      name: string;
+      scientific_name: string;
+      image_url: string | null;
+      added_at: string;
+    }>(
+      `SELECT id, name, scientific_name, image_url, added_at
+       FROM wishlist_items
+       ORDER BY added_at DESC`,
+    );
+    return rows.map(mapRowToWishlistItem);
+  },
+  add: async (item) => {
+    const db = await dbPromise;
+    logger.debug('DB wishlist add', { id: item.id });
+    await db.runAsync(
+      `INSERT OR IGNORE INTO wishlist_items
+       (id, name, scientific_name, image_url, added_at)
+       VALUES (?, ?, ?, ?, ?)`,
+      [item.id, item.name, item.scientificName, item.imageUrl, item.addedAt],
+    );
+  },
+  remove: async (id) => {
+    const db = await dbPromise;
+    logger.debug('DB wishlist remove', { id });
+    await db.runAsync(`DELETE FROM wishlist_items WHERE id = ?`, [id]);
+  },
+  isInWishlist: async (id) => {
+    const db = await dbPromise;
+    logger.debug('DB wishlist isInWishlist', { id });
+    const row = await db.getFirstAsync<{ id: string }>(
+      `SELECT id FROM wishlist_items WHERE id = ? LIMIT 1`,
+      [id],
+    );
+    return Boolean(row?.id);
+  },
+});

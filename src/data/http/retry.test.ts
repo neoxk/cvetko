@@ -5,7 +5,7 @@ describe('withRetry', () => {
   it('retries when error is retryable', async () => {
     const error = createApiError('Temporary failure', {
       kind: 'network',
-      service: 'trefle',
+      service: 'perenual',
       retryable: true,
     });
     let attempts = 0;

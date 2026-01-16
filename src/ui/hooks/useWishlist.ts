@@ -11,7 +11,7 @@ export type UseWishlistState = {
   error: Error | null;
   refresh: () => void;
   toggle: (item: WishlistItem) => void;
-  isInWishlist: (id: string, source: WishlistItem['source']) => boolean;
+  isInWishlist: (id: string) => boolean;
 };
 
 export type UseWishlistParams = {
@@ -60,9 +60,9 @@ export const useWishlist = ({ repository }: UseWishlistParams = {}): UseWishlist
         return;
       }
 
-      const exists = items.some((existing) => existing.id === item.id && existing.source === item.source);
+      const exists = items.some((existing) => existing.id === item.id);
       const nextItems = exists
-        ? items.filter((existing) => !(existing.id === item.id && existing.source === item.source))
+        ? items.filter((existing) => existing.id !== item.id)
         : [item, ...items];
 
       setItems(nextItems);
@@ -77,8 +77,7 @@ export const useWishlist = ({ repository }: UseWishlistParams = {}): UseWishlist
   );
 
   const isInWishlist = React.useCallback(
-    (id: string, source: WishlistItem['source']) =>
-      items.some((existing) => existing.id === id && existing.source === source),
+    (id: string) => items.some((existing) => existing.id === id),
     [items],
   );
 

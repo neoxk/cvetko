@@ -6,7 +6,6 @@ const nowIso = (): string => new Date().toISOString();
 
 export const wishlistItemFromDetail = (detail: PlantDetail): WishlistItem => ({
   id: detail.id,
-  source: detail.source,
   name: detail.commonName ?? detail.scientificName,
   scientificName: detail.scientificName,
   imageUrl: detail.images[0]?.url ?? null,
@@ -15,7 +14,6 @@ export const wishlistItemFromDetail = (detail: PlantDetail): WishlistItem => ({
 
 export const wishlistItemFromList = (item: PlantListItem): WishlistItem => ({
   id: item.id,
-  source: item.source,
   name: item.commonName ?? item.scientificName,
   scientificName: item.scientificName,
   imageUrl: item.imageUrl ?? null,

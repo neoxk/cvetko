@@ -1,24 +1,9 @@
-import { buildPerenualQuery, buildTrefleFilters, normalizeQuery } from './query';
+import { buildPerenualQuery, normalizeQuery } from './query';
 
 describe('plant query builders', () => {
   it('normalizes empty search queries', () => {
     expect(normalizeQuery('  ')).toBeUndefined();
     expect(normalizeQuery('fern')).toBe('fern');
-  });
-
-  it('builds trefle filters with supported fields', () => {
-    const filters = buildTrefleFilters({
-      edible: true,
-      poisonous: false,
-      sunlight: 'full sun',
-      query: 'ignored',
-    });
-
-    expect(filters).toEqual({
-      edible: true,
-      poisonous: false,
-      sunlight: 'full sun',
-    });
   });
 
   it('builds perenual query from filters', () => {
@@ -27,6 +12,7 @@ describe('plant query builders', () => {
       cycle: 'perennial',
       edible: false,
       hardiness: 5,
+      indoor: true,
     });
 
     expect(query).toEqual({
@@ -36,6 +22,7 @@ describe('plant query builders', () => {
       poisonous: undefined,
       sunlight: undefined,
       watering: undefined,
+      indoor: true,
       hardiness: 5,
     });
   });

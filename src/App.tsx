@@ -4,15 +4,15 @@ import { NavigationContainer, DefaultTheme, type Theme } from '@react-navigation
 import { RootNavigator } from '@navigation/RootNavigator';
 import { ThemeProvider, useTheme } from '@ui/theme';
 import { ErrorBoundary } from '@ui/components/ErrorBoundary';
-import { OnboardingScreen } from '@ui/screens/OnboardingScreen';
-import { useOnboarding } from '@ui/hooks/useOnboarding';
 import { useNotificationSync } from '@ui/hooks/useNotificationSync';
-import { initializeDatabase } from '@data/db/client';
-import { logger } from '@utils/logger';
+import { getDatabase } from '@data/db/connection';
+import { logger, setDebugEnabled } from '@utils/logger';
 
 const AppContent = (): React.ReactElement => {
+  if (__DEV__) {
+    setDebugEnabled(true);
+  }
   const theme = useTheme();
-  const onboarding = useOnboarding();
   useNotificationSync();
 
   const navigationTheme: Theme = {
@@ -29,34 +29,10 @@ const AppContent = (): React.ReactElement => {
   };
 
   React.useEffect(() => {
-    initializeDatabase().catch((error: Error) => {
+    getDatabase().catch((error: Error) => {
       logger.error('Failed to initialize database', { error });
     });
   }, []);
-
-  if (onboarding.isLoading) {
-    return (
-      <NavigationContainer theme={navigationTheme}>
-        <RootNavigator />
-      </NavigationContainer>
-    );
-  }
-
-  if (onboarding.error) {
-    return (
-      <NavigationContainer theme={navigationTheme}>
-        <RootNavigator />
-      </NavigationContainer>
-    );
-  }
-
-  if (!onboarding.state.completed) {
-    return (
-      <NavigationContainer theme={navigationTheme}>
-        <OnboardingScreen onComplete={onboarding.complete} />
-      </NavigationContainer>
-    );
-  }
 
   return (
     <NavigationContainer theme={navigationTheme}>

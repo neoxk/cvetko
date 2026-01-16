@@ -6,15 +6,20 @@ import { usePlantActions } from './usePlantActions';
 
 const detail: PlantDetail = {
   id: '1',
-  source: 'perenual',
   commonName: 'Rose',
   scientificName: 'Rosa',
   family: null,
   genus: null,
   description: null,
   images: [],
+  overview: [],
   care: [],
   growth: [],
+  seasonal: [],
+  safety: [],
+  tolerance: [],
+  ecology: [],
+  anatomy: [],
   pests: [],
 };
 

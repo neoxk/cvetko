@@ -1,6 +1,7 @@
 import { createAppError } from '@utils/errors';
+import { logger } from '@utils/logger';
 import type { GardenEntry } from '@domain/garden/types';
-import { loadGardenEntries, saveGardenEntries, type StorageAdapter } from './storage';
+import type { GardenStore } from './storage';
 
 export type GardenRepository = {
   getAll: () => Promise<GardenEntry[]>;
@@ -10,36 +11,31 @@ export type GardenRepository = {
   getById: (id: string) => Promise<GardenEntry | null>;
 };
 
-export const createGardenRepository = (storage: StorageAdapter): GardenRepository => ({
-  getAll: async () => loadGardenEntries(storage),
+export const createGardenRepository = (store: GardenStore): GardenRepository => ({
+  getAll: async () => store.getAll(),
   add: async (entry) => {
     try {
-      const entries = await loadGardenEntries(storage);
-      await saveGardenEntries(storage, [entry, ...entries]);
+      await store.add(entry);
     } catch (error) {
+      logger.error('Garden add failed', { error, id: entry.id });
       throw createAppError('GardenError', 'Failed to add plant to garden', { cause: error });
     }
   },
   update: async (entry) => {
     try {
-      const entries = await loadGardenEntries(storage);
-      const nextEntries = entries.map((existing) => (existing.id === entry.id ? entry : existing));
-      await saveGardenEntries(storage, nextEntries);
+      await store.update(entry);
     } catch (error) {
+      logger.error('Garden update failed', { error, id: entry.id });
       throw createAppError('GardenError', 'Failed to update garden entry', { cause: error });
     }
   },
   remove: async (id) => {
     try {
-      const entries = await loadGardenEntries(storage);
-      const nextEntries = entries.filter((existing) => existing.id !== id);
-      await saveGardenEntries(storage, nextEntries);
+      await store.remove(id);
     } catch (error) {
+      logger.error('Garden remove failed', { error, id });
       throw createAppError('GardenError', 'Failed to remove garden entry', { cause: error });
     }
   },
-  getById: async (id) => {
-    const entries = await loadGardenEntries(storage);
-    return entries.find((entry) => entry.id === id) ?? null;
-  },
+  getById: async (id) => store.getById(id),
 });

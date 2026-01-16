@@ -1,12 +1,11 @@
 import React from 'react';
 
 import type { PlantRepository } from '@data/plants/repository';
-import type { PlantListFilters, PlantListItem, PlantSource } from '@domain/plants/types';
+import type { PlantListFilters, PlantListItem } from '@domain/plants/types';
 import { createAppError } from '@utils/errors';
 
 export type UsePlantListParams = {
   repository: PlantRepository | null;
-  source?: PlantSource;
   filters: PlantListFilters;
 };
 
@@ -23,7 +22,6 @@ export type PlantListState = {
 
 export const usePlantList = ({
   repository,
-  source = 'perenual',
   filters,
 }: UsePlantListParams): PlantListState => {
   const [items, setItems] = React.useState<PlantListItem[]>([]);
@@ -39,7 +37,7 @@ export const usePlantList = ({
       if (!repository) {
         setError(
           createAppError('ConfigError', 'Missing API keys. Set env keys to fetch plants.', {
-            details: { source },
+            details: { api: 'perenual' },
           }),
         );
         setIsLoading(false);
@@ -59,7 +57,6 @@ export const usePlantList = ({
 
       try {
         const response = await repository.listPlants({
-          source,
           page: nextPage,
           filters,
         });
@@ -78,7 +75,7 @@ export const usePlantList = ({
         setIsLoadingMore(false);
       }
     },
-    [filters, repository, source],
+    [filters, repository],
   );
 
   React.useEffect(() => {

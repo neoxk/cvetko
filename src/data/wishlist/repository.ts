@@ -1,57 +1,47 @@
 import { createAppError } from '@utils/errors';
+import { logger } from '@utils/logger';
 import type { WishlistItem } from '@domain/wishlist/types';
-import { loadWishlistItems, saveWishlistItems, type StorageAdapter } from './storage';
+import type { WishlistStore } from './storage';
 
 export type WishlistRepository = {
   getAll: () => Promise<WishlistItem[]>;
   add: (item: WishlistItem) => Promise<void>;
-  remove: (id: string, source: WishlistItem['source']) => Promise<void>;
+  remove: (id: string) => Promise<void>;
   toggle: (item: WishlistItem) => Promise<boolean>;
-  isInWishlist: (id: string, source: WishlistItem['source']) => Promise<boolean>;
+  isInWishlist: (id: string) => Promise<boolean>;
 };
 
-export const createWishlistRepository = (storage: StorageAdapter): WishlistRepository => ({
-  getAll: async () => loadWishlistItems(storage),
+export const createWishlistRepository = (store: WishlistStore): WishlistRepository => ({
+  getAll: async () => store.getAll(),
   add: async (item) => {
     try {
-      const items = await loadWishlistItems(storage);
-      const exists = items.some((existing) => existing.id === item.id && existing.source === item.source);
-      if (exists) {
-        return;
-      }
-      await saveWishlistItems(storage, [item, ...items]);
+      await store.add(item);
     } catch (error) {
+      logger.error('Wishlist add failed', { error, id: item.id });
       throw createAppError('WishlistError', 'Failed to add to wishlist', { cause: error });
     }
   },
-  remove: async (id, source) => {
+  remove: async (id) => {
     try {
-      const items = await loadWishlistItems(storage);
-      const nextItems = items.filter((existing) => !(existing.id === id && existing.source === source));
-      await saveWishlistItems(storage, nextItems);
+      await store.remove(id);
     } catch (error) {
+      logger.error('Wishlist remove failed', { error, id });
       throw createAppError('WishlistError', 'Failed to remove from wishlist', { cause: error });
     }
   },
   toggle: async (item) => {
     try {
-      const items = await loadWishlistItems(storage);
-      const exists = items.some((existing) => existing.id === item.id && existing.source === item.source);
+      const exists = await store.isInWishlist(item.id);
       if (exists) {
-        const nextItems = items.filter(
-          (existing) => !(existing.id === item.id && existing.source === item.source),
-        );
-        await saveWishlistItems(storage, nextItems);
+        await store.remove(item.id);
         return false;
       }
-      await saveWishlistItems(storage, [item, ...items]);
+      await store.add(item);
       return true;
     } catch (error) {
+      logger.error('Wishlist toggle failed', { error, id: item.id });
       throw createAppError('WishlistError', 'Failed to update wishlist', { cause: error });
     }
   },
-  isInWishlist: async (id, source) => {
-    const items = await loadWishlistItems(storage);
-    return items.some((existing) => existing.id === id && existing.source === source);
-  },
+  isInWishlist: async (id) => store.isInWishlist(id),
 });

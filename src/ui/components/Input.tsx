@@ -11,6 +11,7 @@ type InputProps = {
   errorText?: string;
   onChangeText: (value: string) => void;
   onBlur?: () => void;
+  editable?: boolean;
   testID?: string;
 };
 
@@ -22,6 +23,7 @@ export const Input = ({
   errorText,
   onChangeText,
   onBlur,
+  editable = true,
   testID,
 }: InputProps): React.ReactElement => {
   const theme = useTheme();
@@ -51,6 +53,7 @@ export const Input = ({
         placeholder={placeholder}
         placeholderTextColor={theme.colors.placeholder}
         onChangeText={onChangeText}
+        editable={editable}
         onFocus={() => setIsFocused(true)}
         onBlur={() => {
           setIsFocused(false);
@@ -58,7 +61,7 @@ export const Input = ({
         }}
         style={[
           {
-            color: theme.colors.textPrimary,
+            color: editable ? theme.colors.textPrimary : theme.colors.textDisabled,
             fontFamily: theme.typography.fontFamily.body,
             fontSize: theme.typography.sizes.bodyL,
             backgroundColor: theme.colors.surface,
@@ -66,7 +69,9 @@ export const Input = ({
               ? theme.colors.alert
               : isFocused
                 ? theme.colors.primary
-                : theme.colors.border,
+                : editable
+                  ? theme.colors.border
+                  : theme.colors.borderDisabled,
             borderWidth: showError || isFocused ? theme.borders.thick : theme.borders.thin,
             borderRadius: theme.radius.button,
             height: theme.sizing.inputHeight,

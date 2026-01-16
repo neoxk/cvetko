@@ -2,7 +2,6 @@ import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
 import { createDefaultNotificationScheduler } from '@data/notifications/scheduler';
-import { WEATHER_ALERTS_ENABLED } from '@domain/notifications/constants';
 import type { UnitSystem } from '@domain/settings/types';
 import { Card } from '@ui/components/Card';
 import { ErrorState } from '@ui/components/ErrorState';
@@ -90,18 +89,10 @@ export const SettingsScreen = (): React.ReactElement => {
     }
   };
 
-  const handleWeatherToggle = (next: boolean): void => {
-    settingsState.updateSettings({ weatherAlertsEnabled: next });
-  };
-
   const notificationsDisabled = isUpdatingNotification || settingsState.isLoading;
-  const weatherToggleDisabled =
-    notificationsDisabled ||
-    !settingsState.settings.notificationsEnabled ||
-    !WEATHER_ALERTS_ENABLED;
 
   return (
-    <ScreenLayout title={uiStrings.settings.title} footerText={uiStrings.common.appName}>
+    <ScreenLayout title={uiStrings.settings.title}>
       {settingsState.isLoading ? (
         <LoadingState message="Loading preferences..." />
       ) : settingsState.error ? (
@@ -143,18 +134,6 @@ export const SettingsScreen = (): React.ReactElement => {
                 onValueChange={handleNotificationsToggle}
                 disabled={notificationsDisabled}
                 testID="care-reminders-toggle"
-              />
-              <SettingsToggleRow
-                label={uiStrings.settings.weatherAlerts}
-                description={
-                  WEATHER_ALERTS_ENABLED
-                    ? uiStrings.settings.weatherAlertsEnabled
-                    : uiStrings.settings.weatherAlertsDisabled
-                }
-                value={settingsState.settings.weatherAlertsEnabled}
-                onValueChange={handleWeatherToggle}
-                disabled={weatherToggleDisabled}
-                testID="weather-alerts-toggle"
               />
               <View style={{ paddingVertical: theme.spacing.md }}>
                 <Input

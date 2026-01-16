@@ -1,6 +1,7 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { createDefaultPlantRepositories } from '@data/plants/factory';
 import type { PlantDetailRepository } from '@data/plants/detailRepository';
@@ -20,7 +21,27 @@ import { PlantImageGallery } from '@ui/components/PlantImageGallery';
 import { ScreenLayout } from '@ui/components/ScreenLayout';
 import { useTheme } from '@ui/theme';
 import { wishlistItemFromDetail } from '@utils/wishlist';
-import { gardenEntryFromDetail } from '@utils/garden';
+
+const findDetailValue = (
+  items: { label: string; value: string }[],
+  label: string,
+): string | null => items.find((item) => item.label === label)?.value ?? null;
+
+const parseHardinessRange = (value: string | null): { min: number | null; max: number | null } => {
+  if (!value) {
+    return { min: null, max: null };
+  }
+  const parts = value.split('-').map((part) => part.trim());
+  if (parts.length !== 2) {
+    return { min: null, max: null };
+  }
+  const min = Number(parts[0]);
+  const max = Number(parts[1]);
+  return {
+    min: Number.isFinite(min) ? min : null,
+    max: Number.isFinite(max) ? max : null,
+  };
+};
 
 type PlantDetailScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -32,11 +53,14 @@ type PlantDetailScreenProps = NativeStackScreenProps<
 
 export const PlantDetailScreen = ({
   route,
+  navigation,
   repository,
   actionHandlers,
 }: PlantDetailScreenProps): React.ReactElement => {
   const theme = useTheme();
-  const { id, source } = route.params;
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+  const { id } = route.params;
   const resolvedRepository = React.useMemo(() => {
     if (repository) {
       return repository;
@@ -46,23 +70,26 @@ export const PlantDetailScreen = ({
   const { detail, isLoading, error, refresh } = usePlantDetail({
     repository: resolvedRepository,
     id,
-    source,
   });
   const wishlist = useWishlist();
   const garden = useGarden();
+  useFocusEffect(
+    React.useCallback(() => {
+      garden.refresh();
+    }, [garden.refresh]),
+  );
   const resolvedHandlers: PlantActionHandlers = {};
   if (detail) {
     resolvedHandlers.addToWishlist = () => Promise.resolve(wishlist.toggle(wishlistItemFromDetail(detail)));
-    resolvedHandlers.addToGarden = () => Promise.resolve(garden.addEntry(gardenEntryFromDetail(detail)));
   }
   if (actionHandlers?.addToGarden) {
     resolvedHandlers.addToGarden = actionHandlers.addToGarden;
   }
 
   const actions = usePlantActions(detail, resolvedHandlers, {
-    initialInWishlist: detail ? wishlist.isInWishlist(detail.id, detail.source) : false,
-    initialInGarden: detail ? garden.hasPlant(detail.id, detail.source) : false,
+    initialInWishlist: detail ? wishlist.isInWishlist(detail.id) : false,
   });
+  const isInGarden = detail ? garden.hasPlant(detail.id) : false;
 
   const title = detail?.commonName ?? detail?.scientificName ?? 'Plant details';
 
@@ -89,127 +116,161 @@ export const PlantDetailScreen = ({
     );
   } else {
     const sectionSpacing = { marginBottom: theme.spacing.lg };
+    const renderSection = (title: string, items: { label: string; value: string }[]) => {
+      if (items.length === 0) {
+        return null;
+      }
+      return (
+        <View style={sectionSpacing}>
+          <PlantDetailSection title={title}>
+            {items.map((item) => (
+              <PlantDetailRow key={`${title}-${item.label}`} label={item.label} value={item.value} />
+            ))}
+          </PlantDetailSection>
+        </View>
+      );
+    };
+    const hasOverview = detail.overview.length > 0 || Boolean(detail.description);
+
+    const overviewBlock = hasOverview ? (
+      <View style={sectionSpacing}>
+        <PlantDetailSection title="Overview">
+          {detail.overview.map((item) => (
+            <PlantDetailRow key={`overview-${item.label}`} label={item.label} value={item.value} />
+          ))}
+          {detail.description ? (
+            <Text
+              style={{
+                color: theme.colors.textSecondary,
+                fontFamily: theme.typography.fontFamily.body,
+                fontSize: theme.typography.sizes.bodyM,
+                marginTop: detail.overview.length > 0 ? theme.spacing.sm : 0,
+              }}
+            >
+              {detail.description}
+            </Text>
+          ) : null}
+        </PlantDetailSection>
+      </View>
+    ) : null;
+
+    const pestsBlock =
+      detail.pests.length > 0 ? (
+        <View style={sectionSpacing}>
+          <PlantDetailSection title="Pests">
+            {detail.pests.map((pest) => (
+              <Text
+                key={pest}
+                style={{
+                  color: theme.colors.textPrimary,
+                  fontFamily: theme.typography.fontFamily.body,
+                  fontSize: theme.typography.sizes.bodyM,
+                }}
+              >
+                {pest}
+              </Text>
+            ))}
+          </PlantDetailSection>
+        </View>
+      ) : null;
+
+    const actionsBlock = (
+      <View>
+        <View style={{ marginBottom: theme.spacing.md }}>
+          <Button
+            label={actions.isInWishlist ? 'Added to wishlist' : 'Add to wishlist'}
+            onPress={actions.addToWishlist}
+            disabled={actions.isInWishlist || actions.isUpdatingWishlist}
+            variant="secondary"
+          />
+        </View>
+        <View style={{ marginBottom: theme.spacing.md }}>
+          <Button
+            label={isInGarden ? 'Added to my garden' : 'Add to my garden'}
+            onPress={() => {
+              if (!detail || isInGarden) {
+                return;
+              }
+              const watering = findDetailValue(detail.care, 'Watering');
+              const sunlight = findDetailValue(detail.care, 'Sunlight');
+              const cycle = findDetailValue(detail.growth, 'Life cycle');
+              const hardinessValue = findDetailValue(detail.growth, 'Hardiness');
+              const hardiness = parseHardinessRange(hardinessValue);
+              navigation.navigate(Routes.GardenForm, {
+                plant: {
+                  id: detail.id,
+                  name: detail.commonName ?? detail.scientificName,
+                  scientificName: detail.scientificName,
+                  imageUrl: detail.images[0]?.url ?? null,
+                  watering,
+                  sunlight,
+                  cycle,
+                  hardinessMin: hardiness.min,
+                  hardinessMax: hardiness.max,
+                  description: detail.description,
+                },
+              });
+            }}
+            disabled={isInGarden}
+            variant="secondary"
+          />
+        </View>
+        {actions.error ? (
+          <Text
+            style={{
+              color: theme.colors.alert,
+              fontFamily: theme.typography.fontFamily.body,
+              fontSize: theme.typography.sizes.caption,
+            }}
+          >
+            {actions.error.message}
+          </Text>
+        ) : null}
+      </View>
+    );
 
     content = (
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: theme.spacing.xl }]}>
         <View style={sectionSpacing}>
           <PlantImageGallery images={detail.images} />
         </View>
-        {detail.description ? (
-          <View style={sectionSpacing}>
-            <PlantDetailSection title="Overview">
-              <Text
-                style={{
-                  color: theme.colors.textSecondary,
-                  fontFamily: theme.typography.fontFamily.body,
-                  fontSize: theme.typography.sizes.bodyM,
-                }}
-              >
-                {detail.description}
-              </Text>
-            </PlantDetailSection>
+        {isLandscape ? (
+          <View style={{ flexDirection: 'row', gap: theme.spacing.lg }}>
+            <View style={{ flex: 1 }}>
+              {overviewBlock}
+              {renderSection('Care', detail.care)}
+              {renderSection('Growth', detail.growth)}
+            </View>
+            <View style={{ flex: 1 }}>
+              {renderSection('Seasonal & reproduction', detail.seasonal)}
+              {renderSection('Safety & use', detail.safety)}
+              {renderSection('Tolerance', detail.tolerance)}
+              {renderSection('Ecology', detail.ecology)}
+              {renderSection('Anatomy', detail.anatomy)}
+              {pestsBlock}
+              {actionsBlock}
+            </View>
           </View>
-        ) : null}
-        <View style={sectionSpacing}>
-          <PlantDetailSection title="Care">
-            {detail.care.length === 0 ? (
-              <Text
-                style={{
-                  color: theme.colors.textSecondary,
-                  fontFamily: theme.typography.fontFamily.body,
-                  fontSize: theme.typography.sizes.bodyM,
-                }}
-              >
-                No care tips available yet.
-              </Text>
-            ) : (
-              detail.care.map((item) => (
-                <PlantDetailRow key={item.label} label={item.label} value={item.value} />
-              ))
-            )}
-          </PlantDetailSection>
-        </View>
-        <View style={sectionSpacing}>
-          <PlantDetailSection title="Growth">
-            {detail.growth.length === 0 ? (
-              <Text
-                style={{
-                  color: theme.colors.textSecondary,
-                  fontFamily: theme.typography.fontFamily.body,
-                  fontSize: theme.typography.sizes.bodyM,
-                }}
-              >
-                Growth data is limited for this plant.
-              </Text>
-            ) : (
-              detail.growth.map((item) => (
-                <PlantDetailRow key={item.label} label={item.label} value={item.value} />
-              ))
-            )}
-          </PlantDetailSection>
-        </View>
-        <View style={sectionSpacing}>
-          <PlantDetailSection title="Pests">
-            {detail.pests.length === 0 ? (
-              <Text
-                style={{
-                  color: theme.colors.textSecondary,
-                  fontFamily: theme.typography.fontFamily.body,
-                  fontSize: theme.typography.sizes.bodyM,
-                }}
-              >
-                No pest data listed yet.
-              </Text>
-            ) : (
-              detail.pests.map((pest) => (
-                <Text
-                  key={pest}
-                  style={{
-                    color: theme.colors.textPrimary,
-                    fontFamily: theme.typography.fontFamily.body,
-                    fontSize: theme.typography.sizes.bodyM,
-                  }}
-                >
-                  {pest}
-                </Text>
-              ))
-            )}
-          </PlantDetailSection>
-        </View>
-        <View>
-          <View style={{ marginBottom: theme.spacing.md }}>
-            <Button
-              label={actions.isInWishlist ? 'Added to wishlist' : 'Add to wishlist'}
-              onPress={actions.addToWishlist}
-              disabled={actions.isInWishlist || actions.isUpdatingWishlist}
-              variant="secondary"
-            />
+        ) : (
+          <View>
+            {overviewBlock}
+            {renderSection('Care', detail.care)}
+            {renderSection('Growth', detail.growth)}
+            {renderSection('Seasonal & reproduction', detail.seasonal)}
+            {renderSection('Safety & use', detail.safety)}
+            {renderSection('Tolerance', detail.tolerance)}
+            {renderSection('Ecology', detail.ecology)}
+            {renderSection('Anatomy', detail.anatomy)}
+            {pestsBlock}
+            {actionsBlock}
           </View>
-          <View style={{ marginBottom: theme.spacing.md }}>
-            <Button
-              label={actions.isInGarden ? 'Added to my garden' : 'Add to my garden'}
-              onPress={actions.addToGarden}
-              disabled={actions.isInGarden || actions.isUpdatingGarden}
-            />
-          </View>
-          {actions.error ? (
-            <Text
-              style={{
-                color: theme.colors.alert,
-                fontFamily: theme.typography.fontFamily.body,
-                fontSize: theme.typography.sizes.caption,
-              }}
-            >
-              {actions.error.message}
-            </Text>
-          ) : null}
-        </View>
+        )}
       </ScrollView>
     );
   }
 
   return (
-    <ScreenLayout title={title} footerText="Cvetko">
+    <ScreenLayout title={title}>
       <View style={styles.container}>{content}</View>
     </ScreenLayout>
   );

@@ -82,10 +82,6 @@ export const isRetryableError = (error: unknown): boolean => {
     return true;
   }
 
-  if (details.status === 429) {
-    return true;
-  }
-
   if (details.status !== undefined && details.status >= 500) {
     return true;
   }
