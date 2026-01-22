@@ -8,6 +8,7 @@ import { useWishlist } from './useWishlist';
 
 const item: WishlistItem = {
   id: '1',
+  source: 'app',
   name: 'Rose',
   scientificName: 'Rosa',
   imageUrl: null,

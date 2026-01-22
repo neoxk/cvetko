@@ -1,5 +1,6 @@
 import React from 'react';
 import { FlatList, View, type ListRenderItemInfo } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 import type { WishlistItem } from '@domain/wishlist/types';
 import { EmptyState } from '@ui/components/EmptyState';
@@ -15,6 +16,11 @@ export const WishlistScreen = (): React.ReactElement => {
   const theme = useTheme();
   const navigation = useRootNavigation();
   const wishlist = useWishlist();
+  useFocusEffect(
+    React.useCallback(() => {
+      wishlist.refresh();
+    }, [wishlist.refresh]),
+  );
 
   const renderItem = React.useCallback(
     ({ item }: ListRenderItemInfo<WishlistItem>) => (

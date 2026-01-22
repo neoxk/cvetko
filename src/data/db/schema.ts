@@ -13,6 +13,7 @@ export const dbSchema: DbSchema = {
     );`,
     `CREATE TABLE IF NOT EXISTS wishlist_items (
       id TEXT PRIMARY KEY NOT NULL,
+      source TEXT NOT NULL,
       name TEXT NOT NULL,
       scientific_name TEXT NOT NULL,
       image_url TEXT,

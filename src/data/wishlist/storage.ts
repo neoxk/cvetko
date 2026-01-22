@@ -1,5 +1,4 @@
 import type { WishlistItem } from '@domain/wishlist/types';
-import type { DatabaseClient } from '@data/db/client';
 import { getDatabase } from '@data/db/connection';
 import { logger } from '@utils/logger';
 
@@ -32,12 +31,14 @@ export class MemoryWishlistStore implements WishlistStore {
 
 const mapRowToWishlistItem = (row: {
   id: string;
+  source: string;
   name: string;
   scientific_name: string;
   image_url: string | null;
   added_at: string;
 }): WishlistItem => ({
   id: row.id,
+  source: row.source,
   name: row.name,
   scientificName: row.scientific_name,
   imageUrl: row.image_url ?? null,
@@ -52,12 +53,13 @@ export const createDbWishlistStore = (
     logger.debug('DB wishlist getAll');
     const rows = await db.getAllAsync<{
       id: string;
+      source: string;
       name: string;
       scientific_name: string;
       image_url: string | null;
       added_at: string;
     }>(
-      `SELECT id, name, scientific_name, image_url, added_at
+      `SELECT id, source, name, scientific_name, image_url, added_at
        FROM wishlist_items
        ORDER BY added_at DESC`,
     );
@@ -65,13 +67,24 @@ export const createDbWishlistStore = (
   },
   add: async (item) => {
     const db = await dbPromise;
-    logger.debug('DB wishlist add', { id: item.id });
-    await db.runAsync(
-      `INSERT OR IGNORE INTO wishlist_items
-       (id, name, scientific_name, image_url, added_at)
-       VALUES (?, ?, ?, ?, ?)`,
-      [item.id, item.name, item.scientificName, item.imageUrl, item.addedAt],
+    logger.debug('DB wishlist add', {
+      id: item.id,
+      source: item.source,
+      name: item.name,
+      scientificName: item.scientificName,
+      imageUrl: item.imageUrl,
+      addedAt: item.addedAt,
+    });
+    const result = await db.runAsync(
+      `INSERT OR REPLACE INTO wishlist_items
+       (id, source, name, scientific_name, image_url, added_at)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [item.id, item.source, item.name, item.scientificName, item.imageUrl, item.addedAt],
     );
+    logger.debug('DB wishlist add complete', {
+      id: item.id,
+      changes: result?.changes ?? null,
+    });
   },
   remove: async (id) => {
     const db = await dbPromise;

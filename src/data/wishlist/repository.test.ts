@@ -3,6 +3,7 @@ import { MemoryWishlistStore, type WishlistStore } from './storage';
 
 const item = {
   id: '1',
+  source: 'app',
   name: 'Rose',
   scientificName: 'Rosa',
   imageUrl: null,

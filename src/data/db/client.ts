@@ -58,6 +58,7 @@ export const initializeDatabase = async (): Promise<DatabaseClient> => {
     logger.info('DB schema ensured', { version: dbSchema.version });
     await ensureColumns(db, 'wishlist_items', [
       { name: 'id', type: 'TEXT' },
+      { name: 'source', type: 'TEXT' },
       { name: 'name', type: 'TEXT' },
       { name: 'scientific_name', type: 'TEXT' },
       { name: 'image_url', type: 'TEXT' },

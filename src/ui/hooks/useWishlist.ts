@@ -60,20 +60,19 @@ export const useWishlist = ({ repository }: UseWishlistParams = {}): UseWishlist
         return;
       }
 
-      const exists = items.some((existing) => existing.id === item.id);
-      const nextItems = exists
-        ? items.filter((existing) => existing.id !== item.id)
-        : [item, ...items];
-
-      setItems(nextItems);
+      setIsLoading(true);
+      setError(null);
       resolvedRepository
         .toggle(item)
+        .then(() => loadItems())
         .catch((err: Error) => {
-          setItems(items);
           setError(err);
+        })
+        .finally(() => {
+          setIsLoading(false);
         });
     },
-    [items, resolvedRepository],
+    [loadItems, resolvedRepository],
   );
 
   const isInWishlist = React.useCallback(
